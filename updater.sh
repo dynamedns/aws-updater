@@ -39,12 +39,12 @@ fi
 
 if [[ -x `which apt-get` ]]; then
     # We're running Ubuntu/Debian/something else with apt
-    apt-get -qq update
-    apt-get -qqy install awscli
+    sudo apt-get -qq update
+    sudo apt-get -qqy install awscli
 
 elif [[ -x `which yum` ]]; then
     # CentOS / RHEL
-    yum -y install awscli
+    sudo yum -y install awscli
 else
     echo "Error: Cannot determine which platform I'm running on. Please file a bug report at help@dyname.net."
     exit 1
@@ -84,3 +84,12 @@ if [[ $? -eq 0 ]]; then
 else
     echo "Error creating hostname."
 fi
+
+# Create an updater script
+UPDATERFILE="$HOME/.dyname/updater.sh"
+echo -e "#!/bin/bash\n# Dyname Updater\n$UPDATE_CMD\n" > $UPDATERFILE
+chmod 755 $UPDATERFILE
+
+# Every 7 days is enough for an AWS instance - the IP shouldn't change
+CRONPATTERN="$(($RANDOM%59+0)) $(($RANDOM%23+0)) */7 * *"
+echo -e "$(crontab -l 2>/dev/null)\n#-- Begin Dyname updater\n@reboot $UPDATERFILE\n$CRONPATTERN $UPDATERFILE\n#-- End Dyname updater" | crontab
