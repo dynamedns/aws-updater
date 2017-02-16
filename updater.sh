@@ -69,7 +69,7 @@ fi
 echo "Tagged hostname: $TAGGED_NAME"
 
 EMAIL=${EMAIL//@/%}
-UPDATER_URL="$API_PROTOCOL://$EMAIL:$SECRET@$API_HOSTNAME/nic/update?hostname=$TAGGED_NAME"
+UPDATER_URL="$API_PROTOCOL://$EMAIL:$SECRET@$API_HOSTNAME/nic/update?hostname=$TAGGED_NAME&domainsecret=$DOMAINSECRET"
 
 if [[ "$DLCMD" == "wget" ]]; then
     UPDATE_CMD="$DLCMD $DLARG --auth-no-challenge --http-user=$EMAIL --http-password=$SECRET \"$UPDATER_URL\""
@@ -87,9 +87,11 @@ fi
 
 # Create an updater script
 UPDATERFILE="$HOME/.dyname/updater.sh"
+mkdir -p $HOME/.dyname
+
 echo -e "#!/bin/bash\n# Dyname Updater\n$UPDATE_CMD\n" > $UPDATERFILE
 chmod 755 $UPDATERFILE
 
-# Every 7 days is enough for an AWS instance - the IP shouldn't change
+# @reboot and every 7 days is enough for an AWS instance - the IP shouldn't change
 CRONPATTERN="$(($RANDOM%59+0)) $(($RANDOM%23+0)) */7 * *"
 echo -e "$(crontab -l 2>/dev/null)\n#-- Begin Dyname updater\n@reboot $UPDATERFILE\n$CRONPATTERN $UPDATERFILE\n#-- End Dyname updater" | crontab
