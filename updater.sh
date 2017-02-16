@@ -86,8 +86,8 @@ else
 fi
 
 # Create an updater script
-UPDATERFILE="$HOME/.dyname/updater.sh"
-mkdir -p $HOME/.dyname
+UPDATERFILE="/root/.dyname/updater.sh"
+mkdir -p /root/.dyname
 
 echo -e "#!/bin/bash\n# Dyname Updater\n$UPDATE_CMD\n" > $UPDATERFILE
 chmod 755 $UPDATERFILE
